@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Members Only Campaign — Making Self-Exclusion Work</title>
+  <style>
+    :root {
+      --neon-pink: #ff007f;
+      --neon-blue: #00f0ff;
+      --neon-yellow: #ffb703;
+      --bg: #07050d;
+      --panel: #130d22;
+      --card-bg: #1a122e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: #f1f5f9;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 15px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 850px;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    header { text-align: center; padding: 10px 0; }
+    header h1 { color: #fff; font-size: clamp(1.8rem, 5vw, 2.5rem); text-transform: uppercase; letter-spacing: 2px; }
+    header h1 span { color: var(--neon-pink); }
+    header p { color: #94a3b8; font-size: clamp(0.95rem, 2.5vw, 1.15rem); margin-top: 5px; }
+
+    .goody-hero {
+      background: var(--panel);
+      border: 3px solid var(--neon-pink);
+      border-radius: 20px;
+      padding: 25px 20px 18px;
+      text-align: center;
+      box-shadow: 0 0 35px rgba(255, 0, 127, 0.25);
+    }
+
+    .goody-title { color: var(--neon-blue); text-transform: uppercase; letter-spacing: 1.5px; font-size: 1.2rem; margin-bottom: 5px; }
+    .goody-sub { color: #cbd5e1; font-size: 0.9rem; margin-bottom: 15px; }
+
+    .bot-avatar {
+      font-size: 4.5rem;
+      margin: 5px 0 10px;
+      filter: drop-shadow(0 0 15px var(--neon-blue));
+      animation: float 3s ease-in-out infinite;
+      display: inline-block;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .speech-bubble {
+      background: #21163b;
+      border-left: 5px solid var(--neon-blue);
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 1.05rem;
+      text-align: left;
+      min-height: 60px;
+      line-height: 1.4;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    .chat-history {
+      background: #090611;
+      border-radius: 8px;
+      padding: 12px;
+      height: 130px;
+      overflow-y: auto;
+      text-align: left;
+      border: 1px solid #2e224d;
+      font-size: 0.88rem;
+      margin-bottom: 15px;
+    }
+
+    .msg { margin-bottom: 6px; }
+    .msg.goody { color: var(--neon-blue); font-weight: bold; }
+    .msg.user { color: var(--neon-yellow); }
+
+    .control-row { display: flex; gap: 8px; margin-bottom: 10px; }
+
+    input[type="text"] {
+      flex: 1;
+      background: #21163b;
+      border: 1px solid #3d2b6b;
+      border-radius: 25px;
+      padding: 12px 18px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: var(--neon-pink); }
+
+    .btn {
+      background: var(--neon-pink);
+      color: #fff;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 25px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    .btn:hover:not(:disabled) { transform: scale(1.04); }
+
+    .btn-voice {
+      width: 100%;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 25px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 0 15px rgba(37,99,235,0.4);
+      margin-bottom: 15px;
+    }
+
+    .disclaimer-box {
+      border-top: 1px solid #2e224d;
+      padding-top: 10px;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      line-height: 1.35;
+      text-align: justify;
+    }
+
+    .campaign-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 15px;
+    }
+
+    .card { background: var(--card-bg); border: 1px solid #2e224d; border-radius: 12px; padding: 20px; }
+    .card h3 { color: var(--neon-yellow); margin-bottom: 8px; font-size: 1.1rem; }
+    .card p { color: #94a3b8; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Members <span>Only</span> Campaign</h1>
+      <p>Closing the fatal loophole in UK land-based gambling self-exclusion.</p>
+    </header>
+
+    <div class="goody-hero">
+      <div class="goody-title">Meet Goody — Live Policy & Safety Host</div>
+      <div class="goody-sub">Talk live with Goody about retail self-exclusion, door-checks, and the Members Only campaign.</div>
+     
+      <div class="bot-avatar" id="bot">🤖</div>
+     
+      <div class="speech-bubble" id="speech">
+        "Welcome to the Members Only campaign! I am Goody. Click 'Start Voice Chat' to talk with me live, or type your question below!"
+      </div>
+
+      <div class="chat-history" id="chatLog"></div>
+
+      <div class="control-row">
+        <input type="text" id="userInput" placeholder="Or type a question here..." autocomplete="off" />
+        <button class="btn" id="sendBtn">Send</button>
+      </div>
+
+      <button class="btn-voice" id="voiceToggleBtn">🎤 Start Voice Chat (Hands-Free)</button>
+
+      <div class="disclaimer-box">
+        <strong style="color: #cbd5e1;">Disclaimer & AI Notice:</strong> Goody is an experimental AI host powered by generative technology. Responses reflect advocacy perspectives, lived experiences, independent fact-gathering, and policy testing regarding gambling self-exclusion systems. AI outputs may occasionally contain errors or inaccuracies and should not be taken as formal legal, regulatory, or clinical advice. Always independently verify statutory regulations with official licensing authorities and official scheme providers.
+      </div>
+    </div>
+
+    <div class="campaign-section">
+      <div class="card">
+        <h3>Mandatory Door-Checks</h3>
+        <p>Self-exclusion fails without physical verification at the entrance. Betting shops, arcades, and casinos must check ID before entry.</p>
+      </div>
+      <div class="card">
+        <h3>Members Only Access</h3>
+        <p>Requiring membership eliminates anonymity, closing the loophole between robust online schemes like GAMSTOP and retail venues.</p>
+      </div>
+      <div class="card">
+        <h3>Statutory Accountability</h3>
+        <p>Independent enforcement and unified data registers to ensure vulnerable individuals are protected across all land-based premises.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BACKEND_URL = 'https://members-only-bot.onrender.com/api/chat';
+
+    const speech = document.getElementById('speech');
+    const chatLog = document.getElementById('chatLog');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const voiceToggleBtn = document.getElementById('voiceToggleBtn');
+    const bot = document.getElementById('bot');
+   
+    let voiceModeActive = false;
+    let isProcessing = false;
+    let recognition = null;
+
+    function addLog(sender, text, cls) {
+      chatLog.innerHTML += `<div class="msg ${cls}">${sender}: ${text}</div>`;
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function speak(text, onComplete) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.pitch = 1.1;
+        u.rate = 1.05;
+
+        u.onstart = () => { bot.style.animation = "float 0.3s infinite alternate"; };
+        const resetBot = () => {
+          bot.style.animation = "float 3s ease-in-out infinite";
+          if (onComplete) onComplete();
+        };
+        u.onend = resetBot;
+        u.onerror = resetBot;
+
+        window.speechSynthesis.speak(u);
+      } else {
+        if (onComplete) onComplete();
+      }
+    }
+
+    function setBusyState(busy) {
+      isProcessing = busy;
+      sendBtn.disabled = busy;
+      sendBtn.style.opacity = busy ? '0.5' : '1';
+      sendBtn.style.cursor = busy ? 'not-allowed' : 'pointer';
+    }
+
+    async function send(text) {
+      if (!text || !text.trim() || isProcessing) return;
+      setBusyState(true);
+
+      if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+      }
+
+      addLog("You", text, "user");
+      speech.innerText = "Goody is thinking...";
+
+      try {
+        const res = await fetch(BACKEND_URL, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({message: text})
+        });
+        const data = await res.json();
+        const reply = data.reply || "I didn't quite catch that.";
+       
+        speech.innerText = `"${reply}"`;
+        addLog("Goody", reply, "goody");
+
+        speak(reply, () => {
+          setBusyState(false);
+          if (voiceModeActive) {
+            startListening();
+          }
+        });
+      } catch (err) {
+        speech.innerText = "Connection issue! Ensure your server is online.";
+        setBusyState(false);
+        if (voiceModeActive) {
+          setTimeout(startListening, 1500);
+        }
+      }
+    }
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    function startListening() {
+      if (!voiceModeActive || isProcessing || !SR) return;
+      try {
+        recognition.start();
+        voiceToggleBtn.innerText = "🔴 Listening... (Click to Stop)";
+        voiceToggleBtn.style.background = "#dc2626";
+        voiceToggleBtn.style.boxShadow = "0 0 20px rgba(220,38,38,0.7)";
+      } catch (e) {}
+    }
+
+    if (SR) {
+      recognition = new SR();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (e) => {
+        const transcript = e.results[0][0].transcript;
+        if (transcript.trim()) {
+          send(transcript);
+        }
+      };
+
+      recognition.onerror = (e) => {
+        if (voiceModeActive && !isProcessing && e.error !== 'not-allowed') {
+          setTimeout(startListening, 600);
+        }
+      };
+
+      recognition.onend = () => {
+        if (voiceModeActive && !isProcessing) {
+          setTimeout(startListening, 400);
+        }
+      };
+
+      voiceToggleBtn.onclick = () => {
+        voiceModeActive = !voiceModeActive;
+
+        if (voiceModeActive) {
+          speak("", null);
+          startListening();
+        } else {
+          try { recognition.stop(); } catch(e) {}
+          window.speechSynthesis.cancel();
+          voiceToggleBtn.innerText = "🎤 Start Voice Chat (Hands-Free)";
+          voiceToggleBtn.style.background = "#2563eb";
+          voiceToggleBtn.style.boxShadow = "0 0 15px rgba(37,99,235,0.4)";
+        }
+      };
+    } else {
+      voiceToggleBtn.style.display = 'none';
+    }
+
+    sendBtn.onclick = () => { send(userInput.value); userInput.value = ''; };
+    userInput.onkeypress = (e) => { if (e.key === 'Enter') { send(userInput.value); userInput.value = ''; } };
+  </script>
+</body>
+</html>
