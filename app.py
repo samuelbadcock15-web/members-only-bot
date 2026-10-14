@@ -53,7 +53,7 @@ def chat():
         return res, 200
 
     try:
-        # Using gemini-1.5-flash for maximum stability against 503 errors
+        # Using the verified gemini-1.5-flash model endpoint
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
        
         headers = {"Content-Type": "application/json"}
@@ -76,7 +76,7 @@ def chat():
             reply = data['candidates'][0]['content']['parts'][0]['text']
             res = jsonify({'reply': reply})
         else:
-            res = jsonify({'reply': f"API Error {response.status_code}: Google servers are busy. Try again in a moment!"})
+            res = jsonify({'reply': f"API Error {response.status_code}: Check your API key or model permissions."})
            
         res.headers.add('Access-Control-Allow-Origin', '*')
         return res, 200
