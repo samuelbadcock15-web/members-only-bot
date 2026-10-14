@@ -53,7 +53,8 @@ def chat():
         return res, 200
 
     try:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+        # Updated back to gemini-3.6-flash
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key={GEMINI_API_KEY}"
        
         headers = {"Content-Type": "application/json"}
         payload = {
@@ -67,7 +68,6 @@ def chat():
        
         response = requests.post(url, headers=headers, json=payload, timeout=45)
         
-        # Diagnostic print statements for Render logs
         print("GOOGLE API STATUS:", response.status_code)
         print("GOOGLE API RESPONSE:", response.text)
        
