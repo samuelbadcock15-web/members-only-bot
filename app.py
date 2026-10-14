@@ -6,7 +6,6 @@ from flask import Flask, request, jsonify, send_from_directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
 
-# Loads the API key securely from Render environment variables
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 GOODY_PERSONA = """
@@ -67,22 +66,24 @@ def chat():
         }
        
         response = requests.post(url, headers=headers, json=payload, timeout=45)
+        
+        # Diagnostic print statements for Render logs
+        print("GOOGLE API STATUS:", response.status_code)
+        print("GOOGLE API RESPONSE:", response.text)
        
         if response.status_code == 200:
             data = response.json()
             reply = data['candidates'][0]['content']['parts'][0]['text']
             res = jsonify({'reply': reply})
         else:
-            res = jsonify({'reply': "Studio signal drop! Give me just a moment and try that question again."})
+            res = jsonify({'reply': f"API Error {response.status_code}: Check Render logs!"})
            
         res.headers.add('Access-Control-Allow-Origin', '*')
         return res, 200
        
     except Exception as e:
-        if "timed out" in str(e).lower():
-            res = jsonify({'reply': "Whoops! The studio feed took a split-second too long to connect. Throw that question at me one more time and let's roll!"})
-        else:
-            res = jsonify({'reply': "Studio glitch! Give me a quick second and ask again."})
+        print("PYTHON EXCEPTION:", str(e))
+        res = jsonify({'reply': f"Exception: {str(e)}"})
         res.headers.add('Access-Control-Allow-Origin', '*')
         return res, 200
 
